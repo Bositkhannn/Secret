@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Test Results Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section, .output-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+            color: #3498db;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #2980b9;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .data-input {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        #generateBtn {
+            background-color: #2ecc71;
+            color: white;
+            flex: 2;
+        }
+
+        #generateBtn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        #resetBtn {
+            background-color: #e74c3c;
+            color: white;
+            flex: 1;
+        }
+
+        #resetBtn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 12px;
+        }
+
+        .preview-table th, .preview-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .preview-table th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .instructions {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        .task-scores {
+            margin-top: 20px;
+        }
+
+        .task-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .task-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .uploaded-data {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f4fc;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .uploaded-data h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .uploaded-student {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #d1e7f5;
+        }
+
+        .summary-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 12px;
+        }
+
+        .summary-table th, .summary-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .summary-table th {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .task-count-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #taskCount {
+            flex: 1;
+        }
+
+        #updateTasksBtn {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #updateTasksBtn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>School Test Results Generator</h1>
+            <p class="subtitle">Upload student scores and generate complete Excel files with summary tables</p>
+        </header>
+        
+        <div class="app-container">
+            <section class="input-section">
+                <h2 class="section-title">
+                    <i class="fas fa-edit"></i> Test Information
+                </h2>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="class">School Class</label>
+                        <input type="text" id="class" placeholder="e.g., 9-F" value="9-F">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="teacher">Teacher's Name</label>
+                        <input type="text" id="teacher" placeholder="e.g., U.O.Solijonovna" value="U.O.Solijonovna">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" placeholder="Subject name" value="Biologiya">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="semester">Semester/Quarter</label>
+                        <input type="text" id="semester" placeholder="e.g., 1-chorak" value="1-chorak">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="testType">Test Type</label>
+                        <select id="testType">
+                            <option value="BSB">BSB</option>
+                            <option value="CHSB">CHSB</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="testNumber">Test Number</label>
+                        <input type="number" id="testNumber" min="1" value="1">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxScore">Overall Max Score</label>
+                    <input type="number" id="maxScore" min="1" value="15">
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskCount">Number of Tasks</label>
+                    <div class="task-count-group">
+                        <input type="number" id="taskCount" min="1" max="15" value="7">
+                        <button type="button" id="updateTasksBtn">Update Tasks</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Task Max Scores</label>
+                    <div class="task-scores" id="taskScores">
+                        <!-- Task scores will be generated here -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentData">Upload Student Data (Excel)</label>
+                    <div class="file-input-container">
+                        <input type="file" id="studentData" class="file-input" accept=".xlsx, .xls, .csv">
+                        <label for="studentData" class="file-input-label">
+                            <i class="fas fa-upload"></i> Upload Excel File with Student Names (A) and Scores (B)
+                        </label>
+                    </div>
+                    <div class="file-name" id="fileName">No file selected</div>
+                    <p class="format-hint">File should have student names in column A and scores in column B</p>
+                </div>
+                
+                <div class="uploaded-data" id="uploadedData">
+                    <h4>Uploaded Student Data:</h4>
+                    <div id="studentList"></div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="generateBtn">
+                        <i class="fas fa-file-excel"></i> Generate Excel File
+                    </button>
+                    <button id="resetBtn">
+                        <i class="fas fa-redo"></i> Reset Form
+                    </button>
+                </div>
+            </section>
+            
+            <section class="output-section">
+                <h2 class="section-title">
+                    <i class="fas fa-table"></i> Results Preview
+                </h2>
+                <table class="preview-table" id="previewTable">
+                    <!-- Table will be generated by JavaScript -->
+                </table>
+                
+                <table class="summary-table" id="summaryTable">
+                    <!-- Summary table will be generated by JavaScript -->
+                </table>
+                
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i> Excel file generated successfully! Check your downloads folder.
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+                </div>
+                
+                <div class="instructions">
+                    <h3>How to use this tool:</h3>
+                    <ul>
+                        <li>Fill in all the test information fields</li>
+                        <li>Set the number of tasks and click "Update Tasks"</li>
+                        <li>Set the maximum scores for each task</li>
+                        <li>Upload an Excel file with student names in column A and scores in column B</li>
+                        <li>The system will automatically distribute scores across tasks</li>
+                        <li>Click "Generate Excel File" to create and download the complete results</li>
+                        <li>Use "Reset Form" to clear all fields and start over</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const studentDataInput = document.getElementById('studentData');
+            const previewTable = document.getElementById('previewTable');
+            const summaryTable = document.getElementById('summaryTable');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const taskScoresContainer = document.getElementById('taskScores');
+            const maxScoreInput = document.getElementById('maxScore');
+            const fileName = document.getElementById('fileName');
+            const uploadedData = document.getElementById('uploadedData');
+            const studentList = document.getElementById('studentList');
+            const taskCountInput = document.getElementById('taskCount');
+            const updateTasksBtn = document.getElementById('updateTasksBtn');
+            
+            let studentData = [];
+            let taskCount = 7; // Default number of tasks
+            
+            // Initialize task scores
+            initializeTaskScores();
+            
+            // Update tasks when button is clicked
+            updateTasksBtn.addEventListener('click', function() {
+                taskCount = parseInt(taskCountInput.value) || 7;
+                if (taskCount < 1) taskCount = 1;
+                if (taskCount > 15) taskCount = 15;
+                taskCountInput.value = taskCount;
+                initializeTaskScores();
+            });
+            
+            // Handle file selection
+            studentDataInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    fileName.textContent = file.name;
+                    parseExcelFile(file);
+                } else {
+                    fileName.textContent = 'No file selected';
+                    studentData = [];
+                    previewTable.style.display = 'none';
+                    summaryTable.style.display = 'none';
+                    uploadedData.style.display = 'none';
+                }
+            });
+            
+            // Update preview when max score changes
+            maxScoreInput.addEventListener('input', updatePreview);
+            
+            // Generate Excel file
+            generateBtn.addEventListener('click', function() {
+                if (!validateForm()) {
+                    return;
+                }
+                
+                // Get form values
+                const classVal = document.getElementById('class').value;
+                const teacher = document.getElementById('teacher').value;
+                const subject = document.getElementById('subject').value;
+                const semester = document.getElementById('semester').value;
+                const testType = document.getElementById('testType').value;
+                const testNumber = document.getElementById('testNumber').value;
+                const maxScore = document.getElementById('maxScore').value;
+                
+                // Get task scores
+                const taskMaxScores = [];
+                for (let i = 1; i <= taskCount; i++) {
+                    const score = document.getElementById(`task${i}`).value || 0;
+                    taskMaxScores.push(parseInt(score));
+                }
+                
+                // Create Excel workbook
+                const workbook = createExcelWorkbook(
+                    classVal, teacher, subject, semester, testType, 
+                    testNumber, maxScore, studentData, taskMaxScores
+                );
+                
+                // Download the file
+                XLSX.writeFile(workbook, 
+                    `${classVal} ${subject} ${semester} ${testNumber}-${testType}.xlsx`);
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+            });
+            
+            // Reset form
+            resetBtn.addEventListener('click', function() {
+                document.getElementById('class').value = '9-F';
+                document.getElementById('teacher').value = 'U.O.Solijonovna';
+                document.getElementById('subject').value = 'Biologiya';
+                document.getElementById('semester').value = '1-chorak';
+                document.getElementById('testType').value = 'BSB';
+                document.getElementById('testNumber').value = '1';
+                document.getElementById('maxScore').value = '15';
+                document.getElementById('taskCount').value = '7';
+                studentDataInput.value = '';
+                fileName.textContent = 'No file selected';
+                studentData = [];
+                previewTable.style.display = 'none';
+                summaryTable.style.display = 'none';
+                uploadedData.style.display = 'none';
+                successMessage.style.display = 'none';
+                errorMessage.style.display = 'none';
+                
+                // Reset task scores
+                taskCount = 7;
+                initializeTaskScores();
+            });
+            
+            // Parse uploaded Excel file
+            function parseExcelFile(file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Get first worksheet
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        // Process data - column A for names, column B for scores
+                        studentData = [];
+                        studentList.innerHTML = '';
+                        
+                        for (let i = 0; i < jsonData.length; i++) {
+                            const row = jsonData[i];
+                            if (row.length >= 2 && row[0] && !isNaN(row[1])) {
+                                const name = String(row[0]).trim();
+                                const score = parseFloat(row[1]);
+                                
+                                if (name && !isNaN(score)) {
+                                    studentData.push({ name, score });
+                                    
+                                    // Add to uploaded data display
+                                    const studentDiv = document.createElement('div');
+                                    studentDiv.className = 'uploaded-student';
+                                    studentDiv.innerHTML = `<span>${name}</span><span>${score}</span>`;
+                                    studentList.appendChild(studentDiv);
+                                }
+                            }
+                        }
+                        
+                        if (studentData.length > 0) {
+                            uploadedData.style.display = 'block';
+                            updatePreview();
+                        } else {
+                            showError('No valid student data found in the file. Make sure column A has names and column B has scores.');
+                        }
+                    } catch (error) {
+                        console.error('Error parsing Excel file:', error);
+                        showError('Error reading the Excel file. Please make sure it\'s a valid Excel file.');
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showError('Error reading the file.');
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }
+            
+            // Initialize task scores
+            function initializeTaskScores() {
+                taskScoresContainer.innerHTML = '';
+                
+                // Default task scores (will be used if we have more tasks than defaults)
+                const defaultScores = [2, 2, 3, 3, 2, 1, 2, 3, 3, 2, 2, 2, 3, 3, 2];
+                
+                for (let i = 1; i <= taskCount; i++) {
+                    const taskRow = document.createElement('div');
+                    taskRow.className = 'task-row';
+                    
+                    const taskLabel = document.createElement('div');
+                    taskLabel.className = 'task-label';
+                    taskLabel.textContent = `Task ${i} Max Score`;
+                    
+                    const taskInput = document.createElement('input');
+                    taskInput.type = 'number';
+                    taskInput.id = `task${i}`;
+                    taskInput.min = '0';
+                    taskInput.value = defaultScores[i-1] || 1;
+                    taskInput.addEventListener('input', updatePreview);
+                    
+                    taskRow.appendChild(taskLabel);
+                    taskRow.appendChild(taskInput);
+                    taskScoresContainer.appendChild(taskRow);
+                }
+                
+                updatePreview();
+            }
+            
+            // Update preview table
+            function updatePreview() {
+                const maxScore = parseInt(maxScoreInput.value) || 15;
+                
+                if (studentData.length === 0) {
+                    previewTable.style.display = 'none';
+                    summaryTable.style.display = 'none';
+                    return;
+                }
+                
+                // Get task max scores
+                const taskMaxScores = [];
+                for (let i = 1; i <= taskCount; i++) {
+                    const score = document.getElementById(`task${i}`).value || 0;
+                    taskMaxScores.push(parseInt(score));
+                }
+                
+                // Clear previous table content
+                previewTable.innerHTML = '';
+                summaryTable.innerHTML = '';
+                
+                // Create table header
+                const headerRow = document.createElement('tr');
+                
+                // Add headers based on template
+                const headers = ['T/r', 'F.I.SH'];
+                for (let i = 1; i <= taskCount; i++) {
+                    headers.push(`${i}-topshiriq`);
+                }
+                headers.push(`Jami (${maxScore} ball)`, 'foizda');
+                
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                
+                previewTable.appendChild(headerRow);
+                
+                // Create table rows
+                const taskScores = [];
+                const totalScores = [];
+                const percentages = [];
+                
+                for (let i = 0; i < studentData.length; i++) {
+                    const student = studentData[i];
+                    const row = document.createElement('tr');
+                    
+                    // Student number
+                    const numberCell = document.createElement('td');
+                    numberCell.textContent = i + 1;
+                    row.appendChild(numberCell);
+                    
+                    // Student name
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = student.name;
+                    row.appendChild(nameCell);
+                    
+                    // Distribute scores across tasks
+                    const distributedScores = distributeScore(student.score, taskMaxScores, maxScore);
+                    taskScores.push(distributedScores);
+                    
+                    // Task scores
+                    for (let j = 0; j < taskCount; j++) {
+                        const taskCell = document.createElement('td');
+                        taskCell.textContent = distributedScores[j] || 0;
+                        row.appendChild(taskCell);
+                    }
+                    
+                    // Total score
+                    const totalCell = document.createElement('td');
+                    totalCell.textContent = student.score;
+                    totalScores.push(student.score);
+                    row.appendChild(totalCell);
+                    
+                    // Percentage
+                    const percentageCell = document.createElement('td');
+                    const percentage = ((student.score / maxScore) * 100).toFixed(2);
+                    percentageCell.textContent = percentage + '%';
+                    percentages.push(parseFloat(percentage));
+                    row.appendChild(percentageCell);
+                    
+                    previewTable.appendChild(row);
+                }
+                
+                previewTable.style.display = 'table';
+                
+                // Create summary table
+                createSummaryTable(taskScores, totalScores, percentages, taskMaxScores, maxScore);
+            }
+            
+            // Create summary table
+            function createSummaryTable(taskScores, totalScores, percentages, taskMaxScores, maxScore) {
+                // Calculate averages
+                const taskAverages = [];
+                for (let i = 0; i < taskCount; i++) {
+                    let sum = 0;
+                    for (let j = 0; j < taskScores.length; j++) {
+                        sum += taskScores[j][i] || 0;
+                    }
+                    taskAverages.push((sum / taskScores.length).toFixed(2));
+                }
+                
+                const totalAverage = (totalScores.reduce((a, b) => a + b, 0) / totalScores.length).toFixed(2);
+                const percentageAverage = (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(2);
+                
+                // Create summary table
+                const teacher = document.getElementById('teacher').value;
+                
+                // First row of summary
+                const row1 = document.createElement('tr');
+                row1.innerHTML = `<td colspan="2">O'rtacha:</td>`;
+                for (let i = 0; i < taskCount; i++) {
+                    row1.innerHTML += `<td>${taskAverages[i]}</td>`;
+                }
+                row1.innerHTML += `<td>${totalAverage}</td><td></td>`;
+                summaryTable.appendChild(row1);
+                
+                // Second row of summary
+                const row2 = document.createElement('tr');
+                row2.innerHTML = `<td colspan="${8 + taskCount}">O'zlashtirish:</td><td>1</td>`;
+                summaryTable.appendChild(row2);
+                
+                // Third row of summary
+                const row3 = document.createElement('tr');
+                row3.innerHTML = `<td colspan="2">Fan O'qituvchisi : ${teacher}</td>`;
+                row3.innerHTML += `<td colspan="${6 + taskCount}"></td>`;
+                row3.innerHTML += `<td>Sifat:</td><td>${percentageAverage}%</td>`;
+                summaryTable.appendChild(row3);
+                
+                summaryTable.style.display = 'table';
+            }
+            
+            // Distribute score across tasks based on max scores
+            function distributeScore(totalScore, taskMaxScores, overallMax) {
+                const distributed = new Array(taskMaxScores.length).fill(0);
+                let remainingScore = Math.min(totalScore, overallMax);
+                
+                // First pass: fill each task to its maximum if possible
+                for (let i = 0; i < taskMaxScores.length && remainingScore > 0; i++) {
+                    const maxForTask = taskMaxScores[i];
+                    const scoreForTask = Math.min(remainingScore, maxForTask);
+                    distributed[i] = scoreForTask;
+                    remainingScore -= scoreForTask;
+                }
+                
+                return distributed;
+            }
+            
+            // Validate form
+            function validateForm() {
+                const classVal = document.getElementById('class').value;
+                const teacher = document.getElementById('teacher').value;
+                const subject = document.getElementById('subject').value;
+                const semester = document.getElementById('semester').value;
+                const maxScore = document.getElementById('maxScore').value;
+                
+                if (!classVal) {
+                    showError('Please enter the school class');
+                    return false;
+                }
+                
+                if (!teacher) {
+                    showError('Please enter the teacher\'s name');
+                    return false;
+                }
+                
+                if (!subject) {
+                    showError('Please enter the subject');
+                    return false;
+                }
+                
+                if (!semester) {
+                    showError('Please enter the semester/quarter');
+                    return false;
+                }
+                
+                if (!maxScore || maxScore <= 0) {
+                    showError('Please enter a valid max score');
+                    return false;
+                }
+                
+                if (studentData.length === 0) {
+                    showError('Please upload a student data file');
+                    return false;
+                }
+                
+                // Validate task scores
+                let totalTaskMax = 0;
+                for (let i = 1; i <= taskCount; i++) {
+                    const score = document.getElementById(`task${i}`).value || 0;
+                    if (score < 0) {
+                        showError(`Task ${i} max score cannot be negative`);
+                        return false;
+                    }
+                    totalTaskMax += parseInt(score);
+                }
+                
+                if (totalTaskMax !== parseInt(maxScore)) {
+                    showError(`Sum of task max scores (${totalTaskMax}) must equal overall max score (${maxScore})`);
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // Show error message
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+            }
+            
+            // Function to create Excel workbook
+            function createExcelWorkbook(classVal, teacher, subject, semester, testType, 
+                                       testNumber, maxScore, students, taskMaxScores) {
+                const workbook = XLSX.utils.book_new();
+                
+                // Create worksheet data
+                const worksheetData = [];
+                
+                // Title row
+                worksheetData.push([`"${classVal}" ${subject} ${semester}. ${testNumber}-${testType} natijalari`]);
+                worksheetData.push([]); // Empty row
+                
+                // Header row
+                const headers = ['T/r', 'F.I.SH'];
+                for (let i = 1; i <= taskCount; i++) {
+                    headers.push(`${i}-topshiriq`);
+                }
+                headers.push(`Jami (${maxScore} ball)`, 'foizda');
+                worksheetData.push(headers);
+                
+                // Student data rows
+                const taskScores = [];
+                const totalScores = [];
+                
+                for (let i = 0; i < students.length; i++) {
+                    const student = students[i];
+                    const row = [i + 1, student.name];
+                    
+                    // Distribute scores across tasks
+                    const distributedScores = distributeScore(student.score, taskMaxScores, maxScore);
+                    taskScores.push(distributedScores);
+                    totalScores.push(student.score);
+                    
+                    // Add task scores
+                    for (let j = 0; j < taskCount; j++) {
+                        row.push(distributedScores[j] || 0);
+                    }
+                    
+                    // Add total and percentage columns
+                    row.push(student.score);
+                    // Calculate column letter for percentage formula
+                    const totalCol = String.fromCharCode(65 + taskCount + 2); // A=65, +2 for T/r and F.I.SH
+                    row.push(`=(${totalCol}${i+4}/${maxScore})`);
+                    
+                    worksheetData.push(row);
+                }
+                
+                // Add empty rows
+                worksheetData.push([]);
+                worksheetData.push([]);
+                
+                // Calculate averages for summary
+                const taskAverages = [];
+                for (let i = 0; i < taskCount; i++) {
+                    let sum = 0;
+                    for (let j = 0; j < taskScores.length; j++) {
+                        sum += taskScores[j][i] || 0;
+                    }
+                    taskAverages.push((sum / taskScores.length).toFixed(2));
+                }
+                
+                const totalAverage = (totalScores.reduce((a, b) => a + b, 0) / totalScores.length).toFixed(2);
+                
+                // Add summary rows
+                // First summary row - averages
+                const summaryRow1 = ['', 'O\'rtacha:'];
+                for (let i = 0; i < taskCount; i++) {
+                    const colLetter = String.fromCharCode(67 + i); // C is the first task column
+                    summaryRow1.push(`=СРЗНАЧ(${colLetter}3:${colLetter}${students.length + 2})`);
+                }
+                const totalCol = String.fromCharCode(67 + taskCount); // Column after tasks
+                summaryRow1.push(`=СРЗНАЧ(${totalCol}3:${totalCol}${students.length + 2})`, '');
+                worksheetData.push(summaryRow1);
+                
+                // Second summary row - O'zlashtirish
+                const summaryRow2 = Array(taskCount + 4).fill('');
+                summaryRow2[taskCount + 2] = 'O\'zlashtirish:';
+                summaryRow2[taskCount + 3] = '100%';
+                worksheetData.push(summaryRow2);
+                
+                // Third summary row - Teacher and Sifat
+                const summaryRow3 = Array(taskCount + 4).fill('');
+                summaryRow3[0] = '';
+                summaryRow3[1] = `Fan O'qituvchisi : ${teacher}`;
+                summaryRow3[taskCount + 2] = 'Sifat:';
+                const percentCol = String.fromCharCode(68 + taskCount); // Column after total
+                summaryRow3[taskCount + 3] = `=СРЗНАЧ(${percentCol}3:${percentCol}${students.length + 2})`;
+                worksheetData.push(summaryRow3);
+                
+                // Create worksheet
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Natijalar');
+                
+                return workbook;
+            }
+        });
+    </script>
+</body>
+</html>
