@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Test Results Generator</title>
+    <title>Zerikish Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -366,7 +366,7 @@
     <div class="container">
         <header>
             <h1>Zerikish Generator</h1>
-            <p class="subtitle">nima qilishni faqat yaratgan dasturchi biladi</p>
+            <p class="subtitle">nima qilishshi o'zimam bilmiman to'risi</p>
         </header>
         
         <div class="app-container">
@@ -378,19 +378,19 @@
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="class">School Class</label>
-                        <input type="text" id="class" placeholder="e.g., 9-F" value="9-F">
+                        <input type="text" id="class" placeholder="e.g., 9-F" value="">
                     </div>
                     
                     <div class="form-group">
                         <label for="teacher">Teacher's Name</label>
-                        <input type="text" id="teacher" placeholder="e.g., U.O.Solijonovna" value="U.O.Solijonovna">
+                        <input type="text" id="teacher" placeholder="e.g., U.O.Solijonovna" value="">
                     </div>
                 </div>
                 
                 <div class="grid-2">
                     <div class="form-group">
                         <label for="subject">Subject</label>
-                        <input type="text" id="subject" placeholder="Subject name" value="Biologiya">
+                        <input type="text" id="subject" placeholder="Subject name" value="">
                     </div>
                     
                     <div class="form-group">
@@ -416,13 +416,13 @@
                 
                 <div class="form-group">
                     <label for="maxScore">Overall Max Score</label>
-                    <input type="number" id="maxScore" min="1" value="15">
+                    <input type="number" id="maxScore" min="1" value="50">
                 </div>
                 
                 <div class="form-group">
                     <label for="taskCount">Number of Tasks</label>
                     <div class="task-count-group">
-                        <input type="number" id="taskCount" min="1" max="15" value="7">
+                        <input type="number" id="taskCount" min="1" max="16" value="5">
                         <button type="button" id="updateTasksBtn">Update Tasks</button>
                     </div>
                 </div>
@@ -498,7 +498,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+       document.addEventListener('DOMContentLoaded', function() {
             const generateBtn = document.getElementById('generateBtn');
             const resetBtn = document.getElementById('resetBtn');
             const studentDataInput = document.getElementById('studentData');
@@ -516,16 +516,16 @@
             const updateTasksBtn = document.getElementById('updateTasksBtn');
             
             let studentData = [];
-            let taskCount = 7; // Default number of tasks
+            let taskCount = 5; // Default number of tasks
             
             // Initialize task scores
             initializeTaskScores();
             
             // Update tasks when button is clicked
             updateTasksBtn.addEventListener('click', function() {
-                taskCount = parseInt(taskCountInput.value) || 7;
+                taskCount = parseInt(taskCountInput.value) || 5;
                 if (taskCount < 1) taskCount = 1;
-                if (taskCount > 15) taskCount = 15;
+                if (taskCount > 16) taskCount = 16;
                 taskCountInput.value = taskCount;
                 initializeTaskScores();
             });
@@ -561,13 +561,13 @@
                 const semester = document.getElementById('semester').value;
                 const testType = document.getElementById('testType').value;
                 const testNumber = document.getElementById('testNumber').value;
-                const maxScore = document.getElementById('maxScore').value;
+                const maxScore = parseFloat(document.getElementById('maxScore').value);
                 
                 // Get task scores
                 const taskMaxScores = [];
                 for (let i = 1; i <= taskCount; i++) {
-                    const score = document.getElementById(`task${i}`).value || 0;
-                    taskMaxScores.push(parseInt(score));
+                    const score = parseFloat(document.getElementById(`task${i}`).value) || 0;
+                    taskMaxScores.push(score);
                 }
                 
                 // Create Excel workbook
@@ -596,7 +596,7 @@
                 document.getElementById('semester').value = '1-chorak';
                 document.getElementById('testType').value = 'BSB';
                 document.getElementById('testNumber').value = '1';
-                document.getElementById('maxScore').value = '15';
+                document.getElementById('maxScore').value = '16';
                 document.getElementById('taskCount').value = '7';
                 studentDataInput.value = '';
                 fileName.textContent = 'No file selected';
@@ -608,7 +608,7 @@
                 errorMessage.style.display = 'none';
                 
                 // Reset task scores
-                taskCount = 7;
+                taskCount = 5;
                 initializeTaskScores();
             });
             
@@ -671,7 +671,7 @@
                 taskScoresContainer.innerHTML = '';
                 
                 // Default task scores (will be used if we have more tasks than defaults)
-                const defaultScores = [2, 2, 3, 3, 2, 1, 2, 3, 3, 2, 2, 2, 3, 3, 2];
+                const defaultScores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                 
                 for (let i = 1; i <= taskCount; i++) {
                     const taskRow = document.createElement('div');
@@ -685,6 +685,7 @@
                     taskInput.type = 'number';
                     taskInput.id = `task${i}`;
                     taskInput.min = '0';
+                    taskInput.step = '0.5';
                     taskInput.value = defaultScores[i-1] || 1;
                     taskInput.addEventListener('input', updatePreview);
                     
@@ -698,7 +699,7 @@
             
             // Update preview table
             function updatePreview() {
-                const maxScore = parseInt(maxScoreInput.value) || 15;
+                const maxScore = parseFloat(maxScoreInput.value) || 16;
                 
                 if (studentData.length === 0) {
                     previewTable.style.display = 'none';
@@ -709,8 +710,8 @@
                 // Get task max scores
                 const taskMaxScores = [];
                 for (let i = 1; i <= taskCount; i++) {
-                    const score = document.getElementById(`task${i}`).value || 0;
-                    taskMaxScores.push(parseInt(score));
+                    const score = parseFloat(document.getElementById(`task${i}`).value) || 0;
+                    taskMaxScores.push(score);
                 }
                 
                 // Clear previous table content
@@ -829,17 +830,80 @@
                 summaryTable.style.display = 'table';
             }
             
-            // Distribute score across tasks based on max scores
+            // Distribute score randomly across tasks while respecting limits
             function distributeScore(totalScore, taskMaxScores, overallMax) {
                 const distributed = new Array(taskMaxScores.length).fill(0);
                 let remainingScore = Math.min(totalScore, overallMax);
                 
-                // First pass: fill each task to its maximum if possible
-                for (let i = 0; i < taskMaxScores.length && remainingScore > 0; i++) {
-                    const maxForTask = taskMaxScores[i];
-                    const scoreForTask = Math.min(remainingScore, maxForTask);
-                    distributed[i] = scoreForTask;
-                    remainingScore -= scoreForTask;
+                // First, set all tasks to their minimum possible (0)
+                for (let i = 0; i < taskMaxScores.length; i++) {
+                    distributed[i] = 0;
+                }
+                
+                // Create an array of indices to shuffle the order
+                const indices = Array.from({length: taskMaxScores.length}, (_, i) => i);
+                
+                // Shuffle the indices randomly
+                for (let i = indices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indices[i], indices[j]] = [indices[j], indices[i]];
+                }
+                
+                // Distribute score randomly across tasks
+                let attempts = 0;
+                const maxAttempts = 1000;
+                
+                while (remainingScore > 0 && attempts < maxAttempts) {
+                    let distributedThisRound = false;
+                    
+                    // Try to add points to random tasks
+                    for (const idx of indices) {
+                        if (remainingScore <= 0) break;
+                        
+                        // Only add to this task if it has room and we have points left
+                        if (distributed[idx] < taskMaxScores[idx] && remainingScore > 0) {
+                            // Calculate how much we can add (at least 0.5, at most what's available)
+                            const maxPossible = Math.min(
+                                taskMaxScores[idx] - distributed[idx],
+                                remainingScore
+                            );
+                            
+                            if (maxPossible > 0) {
+                                // Add a random amount (at least 0.5)
+                                const randomFactor = Math.random();
+                                const toAdd = Math.max(0.5, randomFactor * maxPossible);
+                                // Round to nearest 0.5
+                                const roundedToAdd = Math.round(toAdd * 2) / 2;
+                                const finalToAdd = Math.min(roundedToAdd, maxPossible);
+                                
+                                distributed[idx] += finalToAdd;
+                                remainingScore -= finalToAdd;
+                                distributedThisRound = true;
+                                
+                                // Fix floating point precision issues
+                                distributed[idx] = Math.round(distributed[idx] * 10) / 10;
+                                remainingScore = Math.round(remainingScore * 10) / 10;
+                            }
+                        }
+                    }
+                    
+                    if (!distributedThisRound) break;
+                    attempts++;
+                }
+                
+                // If there's still remaining score, distribute it sequentially
+                if (remainingScore > 0) {
+                    for (let i = 0; i < taskMaxScores.length && remainingScore > 0; i++) {
+                        const available = taskMaxScores[i] - distributed[i];
+                        const toAdd = Math.min(available, remainingScore);
+                        if (toAdd > 0) {
+                            distributed[i] += toAdd;
+                            remainingScore -= toAdd;
+                            // Fix floating point precision
+                            distributed[i] = Math.round(distributed[i] * 10) / 10;
+                            remainingScore = Math.round(remainingScore * 10) / 10;
+                        }
+                    }
                 }
                 
                 return distributed;
@@ -851,7 +915,7 @@
                 const teacher = document.getElementById('teacher').value;
                 const subject = document.getElementById('subject').value;
                 const semester = document.getElementById('semester').value;
-                const maxScore = document.getElementById('maxScore').value;
+                const maxScore = parseFloat(document.getElementById('maxScore').value);
                 
                 if (!classVal) {
                     showError('Please enter the school class');
@@ -886,15 +950,16 @@
                 // Validate task scores
                 let totalTaskMax = 0;
                 for (let i = 1; i <= taskCount; i++) {
-                    const score = document.getElementById(`task${i}`).value || 0;
+                    const score = parseFloat(document.getElementById(`task${i}`).value) || 0;
                     if (score < 0) {
                         showError(`Task ${i} max score cannot be negative`);
                         return false;
                     }
-                    totalTaskMax += parseInt(score);
+                    totalTaskMax += score;
                 }
                 
-                if (totalTaskMax !== parseInt(maxScore)) {
+                // Use a small epsilon for floating point comparison
+                if (Math.abs(totalTaskMax - parseFloat(maxScore)) > 0.01) {
                     showError(`Sum of task max scores (${totalTaskMax}) must equal overall max score (${maxScore})`);
                     return false;
                 }
@@ -1000,6 +1065,41 @@
                 
                 // Create worksheet
                 const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                
+                // Apply styling to all cells with content
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                
+                for (let R = range.s.r; R <= range.e.r; R++) {
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const cell_address = {c: C, r: R};
+                        const cell_ref = XLSX.utils.encode_cell(cell_address);
+                        
+                        if (worksheet[cell_ref]) {
+                            // Center align all text (both horizontal and vertical)
+                            if (!worksheet[cell_ref].s) worksheet[cell_ref].s = {};
+                            worksheet[cell_ref].s.alignment = {
+                                horizontal: 'center',
+                                vertical: 'center'
+                            };
+                            
+                            // Add black borders to all cells with content
+                            worksheet[cell_ref].s.border = {
+                                top: { style: 'thin', color: { rgb: '000000' } },
+                                left: { style: 'thin', color: { rgb: '000000' } },
+                                bottom: { style: 'thin', color: { rgb: '000000' } },
+                                right: { style: 'thin', color: { rgb: '000000' } }
+                            };
+                            
+                            // Apply green background to first 3 rows where there's text
+                            if (R < 3 && worksheet[cell_ref].v && worksheet[cell_ref].v !== '') {
+                                worksheet[cell_ref].s.fill = {
+                                    patternType: 'solid',
+                                    fgColor: { rgb: '47D600' } // RGB 71, 214, 0
+                                };
+                            }
+                        }
+                    }
+                }
                 
                 // Add worksheet to workbook
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Natijalar');
