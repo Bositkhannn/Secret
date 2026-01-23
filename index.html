@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zerikish Generator</title>
+    <title>School Test Results Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -366,7 +366,7 @@
     <div class="container">
         <header>
             <h1>Zerikish Generator</h1>
-            <p class="subtitle">nima qilishshi o'zimam bilmiman to'risi</p>
+            <p class="subtitle">Nima qilishshi o'zimam bilmiman to'risi</p>
         </header>
         
         <div class="app-container">
@@ -482,15 +482,10 @@
                 </div>
                 
                 <div class="instructions">
-                    <h3>How to use this tool:</h3>
+                    <h3>Qanday ishlatiladi:</h3>
                     <ul>
-                        <li>Fill in all the test information fields</li>
-                        <li>Set the number of tasks and click "Update Tasks"</li>
-                        <li>Set the maximum scores for each task</li>
-                        <li>Upload an Excel file with student names in column A and scores in column B</li>
-                        <li>The system will automatically distribute scores across tasks</li>
-                        <li>Click "Generate Excel File" to create and download the complete results</li>
-                        <li>Use "Reset Form" to clear all fields and start over</li>
+                        <li>Nimadir qiling va tayyor</li>
+                    
                     </ul>
                 </div>
             </section>
@@ -1065,41 +1060,6 @@
                 
                 // Create worksheet
                 const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-                
-                // Apply styling to all cells with content
-                const range = XLSX.utils.decode_range(worksheet['!ref']);
-                
-                for (let R = range.s.r; R <= range.e.r; R++) {
-                    for (let C = range.s.c; C <= range.e.c; C++) {
-                        const cell_address = {c: C, r: R};
-                        const cell_ref = XLSX.utils.encode_cell(cell_address);
-                        
-                        if (worksheet[cell_ref]) {
-                            // Center align all text (both horizontal and vertical)
-                            if (!worksheet[cell_ref].s) worksheet[cell_ref].s = {};
-                            worksheet[cell_ref].s.alignment = {
-                                horizontal: 'center',
-                                vertical: 'center'
-                            };
-                            
-                            // Add black borders to all cells with content
-                            worksheet[cell_ref].s.border = {
-                                top: { style: 'thin', color: { rgb: '000000' } },
-                                left: { style: 'thin', color: { rgb: '000000' } },
-                                bottom: { style: 'thin', color: { rgb: '000000' } },
-                                right: { style: 'thin', color: { rgb: '000000' } }
-                            };
-                            
-                            // Apply green background to first 3 rows where there's text
-                            if (R < 3 && worksheet[cell_ref].v && worksheet[cell_ref].v !== '') {
-                                worksheet[cell_ref].s.fill = {
-                                    patternType: 'solid',
-                                    fgColor: { rgb: '47D600' } // RGB 71, 214, 0
-                                };
-                            }
-                        }
-                    }
-                }
                 
                 // Add worksheet to workbook
                 XLSX.utils.book_append_sheet(workbook, worksheet, 'Natijalar');
